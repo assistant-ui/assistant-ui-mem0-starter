@@ -52,6 +52,7 @@ const useMemories = (): Memory[] => {
               event: m.event,
               id: m.id,
               memory: m.data.memory,
+              score: 1,
             })
           );
         } else if (a.type === "mem0-get") {
@@ -59,6 +60,7 @@ const useMemories = (): Memory[] => {
             event: "GET",
             id: m.id,
             memory: m.memory,
+            score: m.score,
           }));
         }
         throw new Error("Unexpected annotation: " + JSON.stringify(a));

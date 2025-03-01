@@ -14,6 +14,7 @@ export type Memory = {
   event: "ADD" | "UPDATE" | "DELETE" | "GET";
   id: string;
   memory: string;
+  score: number;
 };
 
 interface MemoryIndicatorProps {
@@ -87,6 +88,11 @@ export default function MemoryIndicator({ memories }: MemoryIndicatorProps) {
                   {memory.event === "DELETE" && "Deleted"}
                 </Badge>
                 <span className="flex-1">{memory.memory}</span>
+                {memory.event === "GET" && (
+                  <span className="shrink-0">
+                    {Math.round(memory.score * 100)}%
+                  </span>
+                )}
               </li>
             ))}
           </ul>

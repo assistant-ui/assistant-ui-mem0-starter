@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { createDataStreamResponse, jsonSchema, streamText } from "ai";
-import {
-  addMemories,
-  getMemories,
-  searchMemories,
-} from "@mem0/vercel-ai-provider";
+import { addMemories, getMemories } from "@mem0/vercel-ai-provider";
 import { openai } from "@ai-sdk/openai";
 
 export const runtime = "edge";
