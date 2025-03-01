@@ -1,8 +1,24 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+This project uses:
+
+- [assistant-ui](https://assistant-ui.com) for the chat interface
+- [mem0](https://mem0.ai) for memory
+- [OpenAI](https://openai.com) for the AI model
+
 ## Getting Started
 
-First, run the development server:
+First, set up your environment variables in `.env.local`:
+
+```bash
+OPENAI_API_KEY=your_openai_api_key
+MEM0_API_KEY=your_mem0_api_key # sign up at mem0.ai
+
+# optional chat history
+NEXT_PUBLIC_ASSISTANT_API_KEY=your_assistant_api_key # sign up at cloud.assistant-ui.com
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
