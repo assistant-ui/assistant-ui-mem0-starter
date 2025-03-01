@@ -21,10 +21,9 @@ const retrieveMemories = (memories: any) => {
 };
 
 export async function POST(req: Request) {
-  const { messages, system, tools } = await req.json();
-  const user_id = "test";
+  const { messages, system, tools, userId } = await req.json();
 
-  const memories = await getMemories(messages, { user_id });
+  const memories = await getMemories(messages, { user_id: userId });
   const mem0Instructions = retrieveMemories(memories);
 
   const result = streamText({
@@ -42,7 +41,7 @@ export async function POST(req: Request) {
     ),
   });
 
-  const addMemoriesTask = addMemories(messages, { user_id });
+  const addMemoriesTask = addMemories(messages, { user_id: userId });
   return createDataStreamResponse({
     execute: async (writer) => {
       if (memories.length > 0) {
