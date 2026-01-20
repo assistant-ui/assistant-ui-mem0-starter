@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { createDataStreamResponse, jsonSchema, streamText } from "ai";
+import {
+  streamText,
+  UIMessage,
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+} from "ai";
 import { addMemories, getMemories } from "@mem0/vercel-ai-provider";
 import { openai } from "@ai-sdk/openai";
+import { frontendTools } from "@assistant-ui/react-ai-sdk";
 
-export const runtime = "edge";
 export const maxDuration = 30;
 
 const retrieveMemories = (memories: any) => {
@@ -20,46 +26,75 @@ const retrieveMemories = (memories: any) => {
   return `System Message: ${systemPrompt} ${memoriesText}`;
 };
 
-export async function POST(req: Request) {
-  const { messages, system, tools, userId } = await req.json();
+// Extract text content from messages for mem0
+const extractTextFromMessages = (messages: UIMessage[]): string => {
+  return messages
+    .map((m) => {
+      if (Array.isArray(m.parts)) {
+        return m.parts
+          .filter((p): p is { type: "text"; text: string } => p.type === "text")
+          .map((p) => p.text)
+          .join(" ");
+      }
+      return "";
+    })
+    .join("\n");
+};
 
-  const memories = await getMemories(messages, { user_id: userId });
+export async function POST(req: Request) {
+  const {
+    messages,
+    system,
+    tools,
+    userId,
+  } = (await req.json()) as {
+    messages: UIMessage[];
+    system?: string;
+    tools?: Parameters<typeof frontendTools>[0];
+    userId: string;
+  };
+
+  // Convert UIMessages to model messages for streamText
+  const modelMessages = convertToModelMessages(messages);
+
+  // Extract text for mem0 (it expects string or LanguageModelV2Prompt)
+  const textPrompt = extractTextFromMessages(messages);
+
+  const memories = await getMemories(textPrompt, { user_id: userId });
   const mem0Instructions = retrieveMemories(memories);
 
-  const result = streamText({
-    model: openai("gpt-4o"),
-    messages,
-    // forward system prompt and tools from the frontend
-    system: [system, mem0Instructions].filter(Boolean).join("\n"),
-    tools: Object.fromEntries(
-      Object.entries<{ parameters: unknown }>(tools).map(([name, tool]) => [
-        name,
-        {
-          parameters: jsonSchema(tool.parameters!),
-        },
-      ])
-    ),
-  });
+  // addMemories expects LanguageModelV2Prompt, use modelMessages with type cast
+  const addMemoriesTask = addMemories(modelMessages as any, { user_id: userId });
 
-  const addMemoriesTask = addMemories(messages, { user_id: userId });
-  return createDataStreamResponse({
-    execute: async (writer) => {
+  const stream = createUIMessageStream({
+    execute: async ({ writer }) => {
+      // Write memory annotation as data part with custom type
       if (memories.length > 0) {
-        writer.writeMessageAnnotation({
-          type: "mem0-get",
-          memories,
+        writer.write({
+          type: "data-mem0-get",
+          data: memories,
         });
       }
 
-      result.mergeIntoDataStream(writer);
+      const result = streamText({
+        model: openai("gpt-4o"),
+        messages: modelMessages,
+        system: [system, mem0Instructions].filter(Boolean).join("\n"),
+        tools: tools ? (frontendTools(tools) as any) : undefined,
+      });
 
+      writer.merge(result.toUIMessageStream());
+
+      // Add memories after stream completes
       const newMemories = await addMemoriesTask;
       if (newMemories.length > 0) {
-        writer.writeMessageAnnotation({
-          type: "mem0-update",
-          memories: newMemories,
+        writer.write({
+          type: "data-mem0-update",
+          data: newMemories,
         });
       }
     },
   });
+
+  return createUIMessageStreamResponse({ stream });
 }
