@@ -54,8 +54,15 @@ export async function POST(req: Request) {
     userId: string;
   };
 
+  if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
+    return new Response(
+      JSON.stringify({ error: "userId is required" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // Convert UIMessages to model messages for streamText
-  const modelMessages = convertToModelMessages(messages);
+  const modelMessages = await convertToModelMessages(messages);
 
   // Extract text for mem0 (it expects string or LanguageModelV2Prompt)
   const textPrompt = extractTextFromMessages(messages);
@@ -68,7 +75,7 @@ export async function POST(req: Request) {
 
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
-      // Write memory annotation as data part with custom type
+      // Write memories as v6 custom data part (type: "data-{name}" pattern)
       if (memories.length > 0) {
         writer.write({
           type: "data-mem0-get",

@@ -9,10 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.88",
-    "@assistant-ui/react": "^0.11.57",
-    "@assistant-ui/react-ai-sdk": "^1.1.21",
-    "@assistant-ui/react-markdown": "^0.11.9",
+    "@ai-sdk/openai": "^3.0.13",
+    "@ai-sdk/react": "^3.0.44",
+    "@assistant-ui/react": "^0.11.58",
+    "@assistant-ui/react-ai-sdk": "^1.2.0",
+    "@assistant-ui/react-markdown": "^0.11.10",
     "@mem0/vercel-ai-provider": "^2.0.5",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-popover": "^1.1.15",
@@ -20,7 +21,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@types/js-cookie": "^3.0.6",
     "@types/uuid": "^10.0.0",
-    "ai": "^5.0.116",
+    "ai": "^6.0.42",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "js-cookie": "^3.0.5",
@@ -32,7 +33,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
-    "zod": "^3.25.0"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

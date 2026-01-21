@@ -61,11 +61,11 @@ const useMemories = (): Memory[] => {
   const content = useMessage((m) => m.content);
 
   return useMemo(() => {
-    if (!content) return [];
+    if (!content || !Array.isArray(content)) return [];
 
     const memories: Memory[] = [];
 
-    for (const part of content as unknown[]) {
+    for (const part of content) {
       if (isMem0GetPart(part)) {
         for (const m of part.data) {
           memories.push({
